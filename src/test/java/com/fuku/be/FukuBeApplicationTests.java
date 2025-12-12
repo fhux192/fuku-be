@@ -1,10 +1,10 @@
-package com.fukusaku.be;
+package com.fuku.be;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class FukusakuBeApplicationTests {
+class FukuBeApplicationTests {
 
     @Test
     void contextLoads() {

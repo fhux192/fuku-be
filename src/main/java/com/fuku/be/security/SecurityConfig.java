@@ -1,4 +1,4 @@
-package com.fukusaku.be.security;
+package com.fuku.be.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,6 +39,7 @@ public class SecurityConfig {
 
                         .anyRequest().authenticated()
                 );
+
         return http.build();
     }
 

@@ -1,4 +1,4 @@
-package com.fukusaku.be.dto;
+package com.fuku.be.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

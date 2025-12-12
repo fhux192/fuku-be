@@ -1,4 +1,4 @@
-package com.fukusaku.be.auth;
+package com.fuku.be.auth;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -18,4 +18,7 @@ public class RegistrationRequest {
     @NotBlank(message = "Password is required")
     @Size(min = 6, message = "Password must be at least 6 characters long")
     private String password;
+
+    @NotBlank(message = "Confirm Password is required")
+    private String confirmPassword;
 }

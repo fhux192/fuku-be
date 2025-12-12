@@ -1,11 +1,11 @@
-package com.fukusaku.be.security;
+package com.fuku.be.security;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import com.fukusaku.be.user.User;
+import com.fuku.be.user.User;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -15,7 +15,6 @@ import java.util.Map;
 @Service
 public class JwtUtil {
 
-
     private static final long EXPIRATION_TIME = 1000 * 60 * 60 * 24;
 
     private final SecretKey secretKey;
@@ -23,7 +22,6 @@ public class JwtUtil {
     public JwtUtil(@Value("${jwt.secret.key}") String secret) {
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
-
 
     public String generateToken(User user) {
         Map<String, Object> claims = new HashMap<>();

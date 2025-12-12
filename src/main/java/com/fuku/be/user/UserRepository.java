@@ -1,4 +1,4 @@
-package com.fukusaku.be.user;
+package com.fuku.be.user;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -10,5 +10,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByEmail(String email);
 
-    Optional<User> findByVerificationToken(String token);
+    Optional<User> findByVerificationToken(String verificationToken);
+
+    Optional<User> findByResetPasswordToken(String token);
+
 }

@@ -1,9 +1,23 @@
-package com.fukusaku.be.auth;
+package com.fuku.be.auth;
 
-import com.fukusaku.be.dto.LoginResponse;
+import com.fuku.be.dto.LoginResponse;
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
+import lombok.Data;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+@Data
+class ForgotPasswordRequest {
+    private String email;
+}
+
+@Data
+class ResetPasswordRequest {
+    private String token;
+    private String newPassword;
+}
 
 @RestController
 @RequestMapping("/api/auth")
@@ -16,7 +30,6 @@ public class AuthController {
         this.authService = authService;
     }
 
-    // Endpoint register giữ nguyên
     @PostMapping("/register")
     public ResponseEntity<String> register(@Valid @RequestBody RegistrationRequest request) {
         try {
@@ -29,7 +42,6 @@ public class AuthController {
         }
     }
 
-    // Endpoint verify-email giữ nguyên
     @GetMapping("/verify-email")
     public ResponseEntity<String> verifyEmail(@RequestParam("token") String token) {
         try {
@@ -40,7 +52,6 @@ public class AuthController {
         }
     }
 
-    // THÊM ENDPOINT MỚI
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
         try {
@@ -50,4 +61,27 @@ public class AuthController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+        try {
+            authService.forgotPassword(request.getEmail());
+            return ResponseEntity.ok("Password reset link has been sent to your email.");
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequest request) {
+        try {
+            authService.resetPassword(request.getToken(), request.getNewPassword());
+            return ResponseEntity.ok("Password has been reset successfully. You can now login.");
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 }

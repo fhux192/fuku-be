@@ -1,13 +1,13 @@
-package com.fukusaku.be;
+package com.fuku.be;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class FukusakuBeApplication {
+public class FukuBeApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(FukusakuBeApplication.class, args);
+        SpringApplication.run(FukuBeApplication.class, args);
     }
 
 }

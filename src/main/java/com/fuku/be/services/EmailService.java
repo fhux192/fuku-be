@@ -1,4 +1,4 @@
-package com.fukusaku.be.services;
+package com.fuku.be.services;
 
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -29,6 +29,26 @@ public class EmailService {
 
         helper.setTo(to);
         helper.setSubject("Activate Your Account");
+        helper.setText(content, true);
+
+        mailSender.send(message);
+    }
+
+    public void sendResetPasswordEmail(String to, String token) throws MessagingException {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+        String link = "http://localhost:3000/reset-password?token=" + token;
+
+        String content = "<html><body>"
+                + "<h3>Yêu cầu đặt lại mật khẩu</h3>"
+                + "<p>Bạn vừa yêu cầu đặt lại mật khẩu. Vui lòng bấm vào link bên dưới:</p>"
+                + "<a href=\"" + link + "\">Đặt lại mật khẩu</a>"
+                + "<p>Link này sẽ hết hạn sau 15 phút.</p>"
+                + "</body></html>";
+
+        helper.setTo(to);
+        helper.setSubject("Reset Password Request");
         helper.setText(content, true);
 
         mailSender.send(message);

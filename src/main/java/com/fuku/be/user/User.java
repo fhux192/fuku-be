@@ -1,7 +1,9 @@
-package com.fukusaku.be.user;
+package com.fuku.be.user;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
@@ -23,5 +25,11 @@ public class User {
     private boolean enabled = false;
 
     @Column(name = "verification_token")
-    private String verificationToken;
+    public String verificationToken;
+
+    @Column(name = "reset_password_token")
+    private String resetPasswordToken;
+
+    @Column(name = "reset_password_token_expiry")
+    private LocalDateTime resetPasswordTokenExpiry;
 }
