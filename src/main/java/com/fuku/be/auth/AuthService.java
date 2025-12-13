@@ -29,7 +29,6 @@ public class AuthService {
     }
 
     public void register(RegistrationRequest request) throws MessagingException {
-        // Check exist email
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new IllegalStateException("メールアドレスは既に使用されています (Email already in use)");
         }
@@ -64,7 +63,7 @@ public class AuthService {
         }
 
         user.setEnabled(true);
-        user.setVerificationToken(null); // Xóa token sau khi dùng xong
+        user.setVerificationToken(null);
         userRepository.save(user);
     }
 
@@ -104,7 +103,6 @@ public class AuthService {
         User user = userRepository.findByResetPasswordToken(token)
                 .orElseThrow(() -> new IllegalStateException("無効なリセットトークンです (Invalid reset token)"));
 
-        // Kiểm tra hết hạn
         if (user.getResetPasswordTokenExpiry().isBefore(LocalDateTime.now())) {
             throw new IllegalStateException("トークンの有効期限が切れています (Token has expired)");
         }
