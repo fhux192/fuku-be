@@ -1,55 +1,80 @@
 package com.fuku.be.services;
 
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.stereotype.Service;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.spring6.SpringTemplateEngine;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 @Service
 public class EmailService {
 
     private final JavaMailSender mailSender;
+    private final SpringTemplateEngine templateEngine;
 
-    public EmailService(JavaMailSender mailSender) {
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
+
+    public EmailService(JavaMailSender mailSender, SpringTemplateEngine templateEngine) {
         this.mailSender = mailSender;
+        this.templateEngine = templateEngine;
     }
 
-    public void sendVerificationEmail(String to, String token) throws MessagingException {
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+    /**
+     * Sends an account verification email asynchronously.
+     * @param to The recipient's email address
+     * @param name The user's name
+     * @param token The verification token
+     */
+    public void sendVerificationEmail(String to, String name, String token) throws MessagingException {
+        String link = frontendUrl + "/verify-email?token=" + token;
 
-        String link = "http://localhost:3000/verify-email?token=" + token;
-        String content = "<html><body>"
-                + "<h3>Welcome to Our Bank App!</h3>"
-                + "<p>Thank you for registering. Please click the link below to activate your account:</p>"
-                + "<a href=\"" + link + "\">Activate My Account</a>"
-                + "<p>If you did not register, please ignore this email.</p>"
-                + "</body></html>";
+        // Prepare context variables for the Thymeleaf template
+        Context context = new Context();
+        context.setVariables(Map.of(
+                "name", name,
+                "link", link
+        ));
 
-        helper.setTo(to);
-        helper.setSubject("Activate Your Account");
-        helper.setText(content, true);
+        // Render the HTML content
+        String htmlContent = templateEngine.process("verification-email", context);
 
-        mailSender.send(message);
+        sendHtmlEmail(to, "Welcome to Fuku Japanese - Verify Account", htmlContent);
     }
 
+    /**
+     * Sends a password reset email asynchronously.
+     * @param to The recipient's email address
+     * @param token The reset token
+     */
     public void sendResetPasswordEmail(String to, String token) throws MessagingException {
+        String link = frontendUrl + "/reset-password?token=" + token;
+
+        Context context = new Context();
+        context.setVariable("link", link);
+
+        String htmlContent = templateEngine.process("reset-password", context);
+
+        sendHtmlEmail(to, "Password Reset Request", htmlContent);
+    }
+
+    /**
+     * Helper method to send HTML emails.
+     */
+    private void sendHtmlEmail(String to, String subject, String htmlBody) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-        String link = "http://localhost:3000/reset-password?token=" + token;
-
-        String content = "<html><body>"
-                + "<h3>Yêu cầu đặt lại mật khẩu</h3>"
-                + "<p>Bạn vừa yêu cầu đặt lại mật khẩu. Vui lòng bấm vào link bên dưới:</p>"
-                + "<a href=\"" + link + "\">Đặt lại mật khẩu</a>"
-                + "<p>Link này sẽ hết hạn sau 15 phút.</p>"
-                + "</body></html>";
+        MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
 
         helper.setTo(to);
-        helper.setSubject("Reset Password Request");
-        helper.setText(content, true);
+        helper.setSubject(subject);
+        helper.setText(htmlBody, true); // Set to 'true' to enable HTML processing
 
         mailSender.send(message);
     }

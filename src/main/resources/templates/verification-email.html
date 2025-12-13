@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Verify Your Account</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f6f6f6; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 0 auto; background: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header { text-align: center; border-bottom: 2px solid #ff6b6b; padding-bottom: 10px; margin-bottom: 20px; }
+        .header h1 { color: #333; margin: 0; font-size: 24px; }
+        .content { color: #555; line-height: 1.6; }
+        .btn { display: inline-block; background-color: #ff6b6b; color: #ffffff !important; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; margin-top: 20px; }
+        .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #999; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Fuku Japanese Learning</h1>
+    </div>
+    <div class="content">
+        <h3>Welcome, <span th:text="${name}">User</span>!</h3>
+        <p>Thank you for signing up with Fuku. To begin your journey in mastering Japanese, please verify your email address below.</p>
+        <div style="text-align: center;">
+            <a th:href="${link}" class="btn">Activate Account</a>
+        </div>
+        <p style="margin-top: 20px;">Or copy and paste this link into your browser: <br> <small th:text="${link}"></small></p>
+    </div>
+    <div class="footer">
+        <p>© 2025 Fuku Japanese Learning. Ganbatte!</p>
+    </div>
+</div>
+</body>
+</html>

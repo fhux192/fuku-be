@@ -29,44 +29,55 @@ public class AuthService {
     }
 
     public void register(RegistrationRequest request) throws MessagingException {
+        // Check exist email
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new IllegalStateException("Email already in use");
+            throw new IllegalStateException("メールアドレスは既に使用されています (Email already in use)");
         }
-        if( !request.getPassword().equals(request.getConfirmPassword())) {
-            throw new IllegalStateException("Passwords do not match");
+
+        // Check confirm password
+        if (!request.getPassword().equals(request.getConfirmPassword())) {
+            throw new IllegalStateException("パスワードが一致しません (Passwords do not match)");
         }
+
         User user = new User();
         user.setName(request.getName());
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setEnabled(false);
+        user.setEnabled(false); // User chưa kích hoạt
+
+        // Generate Verification Token
         String token = UUID.randomUUID().toString();
         user.setVerificationToken(token);
+
         userRepository.save(user);
-        emailService.sendVerificationEmail(user.getEmail(), token);
+
+        // Send Email
+        emailService.sendVerificationEmail(user.getEmail(), user.getName(), token);
     }
 
     public void verifyUser(String token) {
         User user = userRepository.findByVerificationToken(token)
-                .orElseThrow(() -> new IllegalStateException("Invalid verification token"));
-        if (user.isEnabled()){
-            throw new IllegalStateException("Account already activated");
+                .orElseThrow(() -> new IllegalStateException("無効な認証トークンです (Invalid verification token)"));
+
+        if (user.isEnabled()) {
+            throw new IllegalStateException("アカウントは既に有効化されています (Account already activated)");
         }
+
         user.setEnabled(true);
-        user.setVerificationToken(null);
+        user.setVerificationToken(null); // Xóa token sau khi dùng xong
         userRepository.save(user);
     }
 
     public LoginResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new IllegalStateException("Invalid email or password"));
+                .orElseThrow(() -> new IllegalStateException("メールアドレスまたはパスワードが間違っています (Invalid email or password)"));
 
         if (!user.isEnabled()) {
-            throw new IllegalStateException("Account is not activated. Please check your email.");
+            throw new IllegalStateException("アカウントが有効化されていません。メールを確認してください。(Account is not activated. Please check your email.)");
         }
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new IllegalStateException("Invalid email or password");
+            throw new IllegalStateException("メールアドレスまたはパスワードが間違っています (Invalid email or password)");
         }
 
         String jwtToken = jwtUtil.generateToken(user);
@@ -75,36 +86,38 @@ public class AuthService {
 
     public void forgotPassword(String email) throws MessagingException {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalStateException("User not found with this email"));
+                .orElseThrow(() -> new IllegalStateException("このメールアドレスのユーザーは見つかりません (User not found with this email)"));
 
+        // Tạo token reset password
         String token = UUID.randomUUID().toString();
         user.setResetPasswordToken(token);
+        // Token hết hạn sau 15 phút
         user.setResetPasswordTokenExpiry(LocalDateTime.now().plusMinutes(15));
 
         userRepository.save(user);
 
+        // Gửi email
         emailService.sendResetPasswordEmail(user.getEmail(), token);
-        System.out.println("Reset Token for " + email + ": " + token);
-        try {
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     public void resetPassword(String token, String newPassword) {
         User user = userRepository.findByResetPasswordToken(token)
-                .orElseThrow(() -> new IllegalStateException("Invalid reset token"));
+                .orElseThrow(() -> new IllegalStateException("無効なリセットトークンです (Invalid reset token)"));
 
+        // Kiểm tra hết hạn
         if (user.getResetPasswordTokenExpiry().isBefore(LocalDateTime.now())) {
-            throw new IllegalStateException("Token has expired");
+            throw new IllegalStateException("トークンの有効期限が切れています (Token has expired)");
+        }
+
+        if (passwordEncoder.matches(newPassword, user.getPassword())) {
+            throw new IllegalArgumentException("新しいパスワードを現在のパスワードと同じにすることはできません (New password cannot be the same as the current password)");
         }
 
         user.setPassword(passwordEncoder.encode(newPassword));
+
         user.setResetPasswordToken(null);
         user.setResetPasswordTokenExpiry(null);
 
         userRepository.save(user);
     }
-
-
 }
