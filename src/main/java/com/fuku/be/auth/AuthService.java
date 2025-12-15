@@ -42,15 +42,13 @@ public class AuthService {
         user.setName(request.getName());
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setEnabled(false); // User chưa kích hoạt
+        user.setEnabled(false);
 
-        // Generate Verification Token
         String token = UUID.randomUUID().toString();
         user.setVerificationToken(token);
 
         userRepository.save(user);
 
-        // Send Email
         emailService.sendVerificationEmail(user.getEmail(), user.getName(), token);
     }
 
@@ -87,15 +85,12 @@ public class AuthService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalStateException("このメールアドレスのユーザーは見つかりません (User not found with this email)"));
 
-        // Tạo token reset password
         String token = UUID.randomUUID().toString();
         user.setResetPasswordToken(token);
-        // Token hết hạn sau 15 phút
         user.setResetPasswordTokenExpiry(LocalDateTime.now().plusMinutes(15));
 
         userRepository.save(user);
 
-        // Gửi email
         emailService.sendResetPasswordEmail(user.getEmail(), token);
     }
 
